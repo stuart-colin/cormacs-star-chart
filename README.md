@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cormac's Star Chart ✨
+
+A fun and interactive weekly behavioral reward chart built with Next.js and ShadCN UI, designed to encourage good behavior and task completion for young children.
+
+## Overview
+
+"Cormac's Star Chart" is a personalized web application created to help parents track and reward a child's daily tasks and behaviors throughout the week. Instead of a traditional paper chart, this digital version offers engaging visual feedback like colorful, bouncing stars and a celebratory confetti display upon reaching weekly goals.
+
+## Features
+
+*   **Weekly Calendar View:** Displays tasks for each day of the week, starting with Sunday.
+*   **Hide Weekends Toggle:** Option to focus specifically on weekday/school-day behaviors.
+*   **Task Tracking:** Check off completed tasks for each day.
+*   **Randomized Star Rewards:** Each completed task earns a star with a random color and a fun bounce animation with randomized speed variations.
+*   **Progress Bar:** Visually tracks the total number of stars earned towards a weekly prize goal.
+*   **Prize Celebration:** A full-screen confetti display erupts when the weekly star target is reached.
+*   **Responsive Design:** Built with ShadCN UI and Tailwind CSS for a clean, playful look that works across different devices.
+
+## Technologies Used
+
+*   **Framework:** Next.js (App Router)
+*   **Language:** TypeScript
+*   **UI Components:** ShadCN UI
+*   **Styling:** Tailwind CSS
+*   **Icons:** Lucide React
+*   **Confetti Animation:** `react-confetti`
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [your-repo-url]
+cd cormacs-star-chart
+npm install # or yarn install
+npm run dev # or yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Future Enhancements (Potential)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*   Data persistence (e.g., using Google Cloud Storage) to save progress between sessions.
+*   Customization options for tasks and prize goals.
+*   Different types of rewards or visual milestones.
+*   User accounts (if needed for multiple children or charts).
