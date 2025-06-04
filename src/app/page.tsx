@@ -147,7 +147,7 @@ export default function CormacsStarChartPage() {
       />
       <div className="flex flex-col items-center mb-8 gap-4">
         <h1 className="text-5xl font-bold text-center text-blue-600 group whitespace-nowrap">
-          Cormac's Star Chart <span className="inline-block transform group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 ease-out">✨</span> {/* Applied font-chewy to the text part */}
+          Cormac&apos;s Star Chart <span className="inline-block transform group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 ease-out">✨</span> {/* Applied font-chewy to the text part */}
         </h1>
         <div className="w-full max-w-3xl"> {/* Increased max-width for controls and progress bar */}
           {/* Row for Total Stars, Hide Weekends toggle, and Reset Week button */}
@@ -197,7 +197,7 @@ export default function CormacsStarChartPage() {
                     htmlFor={`${day.id}-${task.id}`}
                     className={cn( // Use cn for conditional classes
                       "flex-grow cursor-pointer text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis", // Added whitespace-nowrap, overflow-hidden, text-ellipsis
-                      task.completed && 'line-through text-slate-400',
+                      task.completed && "line-through text-slate-400", // Changed single quotes to double quotes
                       // Optional: Add a subtle color to the label based on completion
                       // task.completed ? 'text-green-700' : 'text-gray-700'
                       // Optional: Add a subtle color to the label based on completion
