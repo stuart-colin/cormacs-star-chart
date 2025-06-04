@@ -135,10 +135,42 @@
   animation: bounce 1.25s infinite;
 }
 
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
 .animate-bounce-medium-fast {
   animation: bounce 0.75s infinite;
 }
 
 .animate-bounce-fast {
   animation: bounce 0.5s infinite;
+}
+
+@keyframes spin-once {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-once {
+  animation: spin-once 0.7s ease-out;
+}
+
+@keyframes spin-slow-once {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow-once {
+  animation: spin-slow-once 1.2s ease-out;
 }

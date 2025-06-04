@@ -6,10 +6,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils"; // Import cn for conditional class joining
 import { Label } from "@/components/ui/label";
-import { Star } from 'lucide-react'; // Import Smile and CheckCircle2
 import { Switch } from "@/components/ui/switch"; // Import Switch
 import { FireworksOverlay } from '@/components/fireworks-overlay'; // Import the FireworksOverlay
 import { StarProgressBar } from '@/components/star-progress-bar'; // Import the new component
+import { StarIcon } from '@/components/star-icon'; // Import the new StarIcon component
 
 interface Task {
   id: string;
@@ -48,10 +48,12 @@ const starColorClasses = [
 
 // Define a list of bounce speed classes
 const starBounceSpeedClasses = [
-  'animate-bounce',        // Normal speed (Tailwind's default 1s)
-  'animate-bounce-slow',   // Slower speed (1.5s)
-  'animate-bounce-mediumfast', // Medium fast speed (0.75s)
-  'animate-bounce-fast',   // Faster speed (0.7s)
+  'animate-bounce',             // Normal speed (Tailwind's default 1s)
+  'animate-bounce-slow',        // Slower speed (1.5s) - Matches globals.css
+  'animate-bounce-slow-medium', // Slower-medium speed (1.25s) - Matches globals.css
+  'animate-bounce-medium-fast', // Medium-fast speed (0.75s) - Matches globals.css
+  'animate-bounce-fast',        // Faster speed (0.5s) - Matches globals.css
+
 ];
 
 // Start the week with Sunday
@@ -132,32 +134,6 @@ export default function CormacsStarChartPage() {
     }
   }, [weeklySchedule]); // This effect runs whenever weeklySchedule changes
 
-  /* Removed the original toggleTaskCompletion logic here as it's moved above */
-  /*
-    setWeeklySchedule(prevSchedule =>
-      prevSchedule.map(day => {
-        if (day.id !== dayId) return day;
-
-        return {
-          ...day,
-          tasks: day.tasks.map(task => {
-            if (task.id !== taskId) return task;
-
-            const isCompleting = !task.completed;
-            const newColorClass = isCompleting
-              ? starColorClasses[Math.floor(Math.random() * starColorClasses.length)]
-              : undefined; // Clear color if unchecking
-            const newBounceSpeedClass = isCompleting
-              ? starBounceSpeedClasses[Math.floor(Math.random() * starBounceSpeedClasses.length)]
-              : undefined; // Clear bounce speed if unchecking
-
-            return { ...task, completed: isCompleting, starColorClass: newColorClass, starBounceSpeedClass: newBounceSpeedClass };
-          }),
-        };
-      })
-    );
-  }; */
-
   const totalStars = React.useMemo(() => {
     return weeklySchedule.reduce((total, day) => {
       return total + day.tasks.filter(task => task.completed).length;
@@ -185,8 +161,8 @@ export default function CormacsStarChartPage() {
     // and ensure starColorClass is also reset
     const newInitialSchedule = JSON.parse(JSON.stringify(initialWeeklySchedule));
     const resetSchedule = newInitialSchedule.map((day: DaySchedule) => ({
-      ...day,
-      tasks: day.tasks.map((task: Task) => ({ ...task, completed: false, starColorClass: undefined, starBounceSpeedClass: undefined })),
+      ...day, // Keep other day properties
+      tasks: day.tasks.map((task: Task) => ({ ...task, completed: false, starColorClass: undefined, starBounceSpeedClass: undefined })), // Reset all star-related properties
     }));
     setWeeklySchedule(resetSchedule);
     // Also clear localStorage on reset
@@ -267,11 +243,12 @@ export default function CormacsStarChartPage() {
                   >
                     {task.name}
                   </Label>
-                  {task.completed && task.starColorClass && <Star className={cn(
-                    "h-6 w-6 transform scale-110 transition-transform duration-200",
-                    task.starColorClass,
-                    task.starBounceSpeedClass // Apply the randomized bounce speed class
-                  )} />}
+                  <StarIcon
+                    isCompleted={task.completed}
+                    colorClass={task.starColorClass}
+                    bounceClass={task.starBounceSpeedClass}
+                    baseClassName="h-6 w-6"
+                  />
                 </div>
               ))}
             </CardContent>
