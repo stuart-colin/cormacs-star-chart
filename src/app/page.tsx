@@ -143,7 +143,6 @@ export default function CormacsStarChartPage() {
     <main className="max-w-screen-3xl mx-auto p-4 md:p-8">
       <FireworksOverlay // Assuming FireworksOverlay is your confetti component
         isVisible={showCelebration}
-        onClose={() => setShowCelebration(false)} // onClose might not be strictly needed if auto-hiding
       />
       <div className="flex flex-col items-center mb-8 gap-4">
         <h1 className="text-5xl font-bold text-center text-blue-600 group whitespace-nowrap">

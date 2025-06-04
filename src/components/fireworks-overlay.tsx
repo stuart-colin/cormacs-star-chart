@@ -15,14 +15,12 @@ function useWindowSize() {
   }, []);
   return size;
 }
-import { X } from 'lucide-react';
 
 interface FireworksOverlayProps {
   isVisible: boolean;
-  onClose: () => void;
 }
 
-export function FireworksOverlay({ isVisible, onClose }: FireworksOverlayProps) {
+export function FireworksOverlay({ isVisible }: FireworksOverlayProps) {
   const { width, height } = useWindowSize();
 
   if (!isVisible) {
