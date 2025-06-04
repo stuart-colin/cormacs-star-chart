@@ -69,6 +69,8 @@ const initialWeeklySchedule: DaySchedule[] = daysOfWeek.map(day => ({
   })),
 }));
 
+const LOCAL_STORAGE_KEY = 'cormacsStarChartSchedule'; // Define a key for localStorage
+
 export default function CormacsStarChartPage() {
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(initialWeeklySchedule);
   const [hideWeekends, setHideWeekends] = useState(true); // State to toggle weekend visibility, true by default to hide
@@ -77,6 +79,61 @@ export default function CormacsStarChartPage() {
 
 
   const toggleTaskCompletion = (dayId: string, taskId: string) => {
+    setWeeklySchedule(prevSchedule => {
+      const newSchedule = prevSchedule.map(day => {
+        if (day.id !== dayId) return day;
+
+        return {
+          ...day,
+          tasks: day.tasks.map(task => {
+            if (task.id !== taskId) return task;
+
+            const isCompleting = !task.completed;
+            const newColorClass = isCompleting
+              ? starColorClasses[Math.floor(Math.random() * starColorClasses.length)]
+              : undefined; // Clear color if unchecking
+            const newBounceSpeedClass = isCompleting
+              ? starBounceSpeedClasses[Math.floor(Math.random() * starBounceSpeedClasses.length)]
+              : undefined; // Clear bounce speed if unchecking
+
+            return { ...task, completed: isCompleting, starColorClass: newColorClass, starBounceSpeedClass: newBounceSpeedClass };
+          }),
+        };
+      });
+      return newSchedule; // Return the new schedule to update state
+    });
+  };
+
+  // Load schedule from localStorage on initial mount
+  useEffect(() => {
+    // Check if localStorage is available (it's not in server environments)
+    if (typeof window !== 'undefined') {
+      const savedSchedule = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedSchedule) {
+        try {
+          // Parse the saved data. Ensure it matches the expected structure.
+          const parsedSchedule: DaySchedule[] = JSON.parse(savedSchedule);
+          // Optional: Add validation here to ensure parsedSchedule has the correct shape
+          setWeeklySchedule(parsedSchedule);
+        } catch (error) {
+          console.error("Failed to parse schedule from localStorage:", error);
+          // Fallback to initial schedule if parsing fails
+          setWeeklySchedule(initialWeeklySchedule);
+        }
+      }
+    }
+  }, []); // Empty dependency array means this effect runs only once on mount
+
+  // Save schedule to localStorage whenever it changes
+  useEffect(() => {
+    // Check if localStorage is available
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(weeklySchedule));
+    }
+  }, [weeklySchedule]); // This effect runs whenever weeklySchedule changes
+
+  /* Removed the original toggleTaskCompletion logic here as it's moved above */
+  /*
     setWeeklySchedule(prevSchedule =>
       prevSchedule.map(day => {
         if (day.id !== dayId) return day;
@@ -99,7 +156,7 @@ export default function CormacsStarChartPage() {
         };
       })
     );
-  };
+  }; */
 
   const totalStars = React.useMemo(() => {
     return weeklySchedule.reduce((total, day) => {
@@ -118,7 +175,7 @@ export default function CormacsStarChartPage() {
       // Cleanup the timer if the component unmounts or dependencies change before timeout
       return () => clearTimeout(timer);
     } else {
-      // If stars drop below target, ensure celebration is hidden
+      // If stars drop below target (e.g., after reset), ensure celebration is hidden
       setShowCelebration(false);
     }
   }, [totalStars, PRIZE_TARGET]);
@@ -132,6 +189,10 @@ export default function CormacsStarChartPage() {
       tasks: day.tasks.map((task: Task) => ({ ...task, completed: false, starColorClass: undefined, starBounceSpeedClass: undefined })),
     }));
     setWeeklySchedule(resetSchedule);
+    // Also clear localStorage on reset
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    }
     setShowCelebration(false); // Hide celebration on reset
   }
 
@@ -144,8 +205,10 @@ export default function CormacsStarChartPage() {
       <FireworksOverlay // Assuming FireworksOverlay is your confetti component
         isVisible={showCelebration}
       />
-      <div className="flex flex-col items-center mb-8 gap-4">
-        <h1 className="text-5xl font-bold text-center text-blue-600 group whitespace-nowrap">
+      {/* Sticky Header Section */}
+      <div className="sticky top-0 z-10 flex flex-col items-center mb-8 gap-4 bg-white pb-4"> {/* Added sticky, top-0, z-10, bg-white, and pb-4 */}
+        {/* Main Header - Adjusted text size for responsiveness */}
+        <h1 className="text-4xl sm:text-5xl font-bold text-center text-blue-600 group whitespace-nowrap">
           Cormac&apos;s Star Chart <span className="inline-block transform group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 ease-out">✨</span> {/* Applied font-chewy to the text part */}
         </h1>
         <div className="w-full max-w-3xl"> {/* Increased max-width for controls and progress bar */}
