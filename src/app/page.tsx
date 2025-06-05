@@ -71,13 +71,49 @@ const initialWeeklySchedule: DaySchedule[] = daysOfWeek.map(day => ({
   })),
 }));
 
-const LOCAL_STORAGE_KEY = 'cormacsStarChartSchedule'; // Define a key for localStorage
+// --- API Helper Functions ---
+async function fetchScheduleFromCloud(): Promise<DaySchedule[]> {
+  try {
+    const response = await fetch('/api/schedule');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Failed to fetch schedule: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.schedule || initialWeeklySchedule; // Fallback to initial if API returns empty/unexpected
+  } catch (error) {
+    console.error("Error fetching schedule from cloud:", error);
+    // Fallback to initial schedule on error to ensure app remains usable
+    return initialWeeklySchedule;
+  }
+}
+
+async function saveScheduleToCloud(schedule: DaySchedule[]) {
+  try {
+    const response = await fetch('/api/schedule', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ schedule }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Failed to save schedule: ${response.statusText}`);
+    }
+    console.log("Schedule saved to cloud successfully.");
+  } catch (error) {
+    console.error("Error saving schedule to cloud:", error);
+    // Optionally, notify the user about the save failure
+  }
+}
 
 export default function CormacsStarChartPage() {
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(initialWeeklySchedule);
   const [hideWeekends, setHideWeekends] = useState(true); // State to toggle weekend visibility, true by default to hide
   const PRIZE_TARGET = 20; // Define the target number of stars for the prize
   const [showCelebration, setShowCelebration] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // For loading state
 
 
   const toggleTaskCompletion = (dayId: string, taskId: string) => {
@@ -102,37 +138,29 @@ export default function CormacsStarChartPage() {
           }),
         };
       });
+      saveScheduleToCloud(newSchedule); // Save to cloud after state update
       return newSchedule; // Return the new schedule to update state
     });
   };
 
-  // Load schedule from localStorage on initial mount
+  // Load schedule from Cloud on initial mount
   useEffect(() => {
-    // Check if localStorage is available (it's not in server environments)
-    if (typeof window !== 'undefined') {
-      const savedSchedule = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedSchedule) {
-        try {
-          // Parse the saved data. Ensure it matches the expected structure.
-          const parsedSchedule: DaySchedule[] = JSON.parse(savedSchedule);
-          // Optional: Add validation here to ensure parsedSchedule has the correct shape
-          setWeeklySchedule(parsedSchedule);
-        } catch (error) {
-          console.error("Failed to parse schedule from localStorage:", error);
-          // Fallback to initial schedule if parsing fails
+    setIsLoading(true);
+    fetchScheduleFromCloud()
+      .then(cloudSchedule => {
+        // Ensure cloudSchedule is an array and not empty, otherwise use initial
+        if (Array.isArray(cloudSchedule) && cloudSchedule.length > 0) {
+          setWeeklySchedule(cloudSchedule);
+        } else {
+          // If Firestore is empty or returns an invalid format,
+          // save the initial schedule to establish a baseline.
           setWeeklySchedule(initialWeeklySchedule);
+          saveScheduleToCloud(initialWeeklySchedule);
         }
-      }
-    }
+      })
+      .catch(() => setWeeklySchedule(initialWeeklySchedule)) // Fallback on critical fetch error
+      .finally(() => setIsLoading(false));
   }, []); // Empty dependency array means this effect runs only once on mount
-
-  // Save schedule to localStorage whenever it changes
-  useEffect(() => {
-    // Check if localStorage is available
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(weeklySchedule));
-    }
-  }, [weeklySchedule]); // This effect runs whenever weeklySchedule changes
 
   const totalStars = React.useMemo(() => {
     return weeklySchedule.reduce((total, day) => {
@@ -165,10 +193,7 @@ export default function CormacsStarChartPage() {
       tasks: day.tasks.map((task: Task) => ({ ...task, completed: false, starColorClass: undefined, starBounceSpeedClass: undefined })), // Reset all star-related properties
     }));
     setWeeklySchedule(resetSchedule);
-    // Also clear localStorage on reset
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-    }
+    saveScheduleToCloud(resetSchedule); // Save the reset schedule to cloud
     setShowCelebration(false); // Hide celebration on reset
   }
 
@@ -176,6 +201,13 @@ export default function CormacsStarChartPage() {
     ? weeklySchedule.filter(day => day.dayName !== "Saturday" && day.dayName !== "Sunday")
     : weeklySchedule;
 
+  if (isLoading) {
+    return (
+      <main className="flex justify-center items-center min-h-screen">
+        <p className="text-2xl text-blue-600">Loading Cormac's Star Chart...</p>
+      </main>
+    );
+  }
   return (
     <main className="max-w-screen-3xl mx-auto p-4 md:p-8">
       <FireworksOverlay // Assuming FireworksOverlay is your confetti component
