@@ -204,7 +204,7 @@ export default function CormacsStarChartPage() {
   if (isLoading) {
     return (
       <main className="flex justify-center items-center min-h-screen">
-        <p className="text-2xl text-blue-600">Loading Cormac's Star Chart...</p>
+        <p className="text-2xl text-blue-600">Loading Cormac&apos;s Star Chart...</p>
       </main>
     );
   }
