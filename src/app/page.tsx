@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch"; // Import Switch
 import { FireworksOverlay } from '@/components/fireworks-overlay'; // Import the FireworksOverlay
 import { StarProgressBar } from '@/components/star-progress-bar'; // Import the new component
 import { StarIcon } from '@/components/star-icon'; // Import the new StarIcon component
+import { db } from '@/lib/firebase'; // Import Firestore instance from your firebase.ts
+import { doc, onSnapshot, setDoc } from 'firebase/firestore'; // Import Firestore functions
 
 interface Task {
   id: string;
@@ -71,36 +73,20 @@ const initialWeeklySchedule: DaySchedule[] = daysOfWeek.map(day => ({
   })),
 }));
 
-// --- API Helper Functions ---
-async function fetchScheduleFromCloud(): Promise<DaySchedule[]> {
-  try {
-    const response = await fetch('/api/schedule');
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to fetch schedule: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data.schedule || initialWeeklySchedule; // Fallback to initial if API returns empty/unexpected
-  } catch (error) {
-    console.error("Error fetching schedule from cloud:", error);
-    // Fallback to initial schedule on error to ensure app remains usable
-    return initialWeeklySchedule;
-  }
-}
+const FIRESTORE_COLLECTION = 'starCharts'; // Must match your API route if you still use it for writes
+const FIRESTORE_DOCUMENT_ID = 'cormacWeeklySchedule'; // Must match your API route
 
 async function saveScheduleToCloud(schedule: DaySchedule[]) {
+  // This function now directly uses the client SDK for writes.
+  // Your API POST route is still available if you prefer writes through the backend.
   try {
-    const response = await fetch('/api/schedule', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ schedule }),
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to save schedule: ${response.statusText}`);
-    }
+    // Ensure db is imported from '@/lib/firebase'
+    const docRef = doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOCUMENT_ID);
+    // We store the schedule array under a field, e.g., 'scheduleData'
+    // Using setDoc will overwrite the document or create it if it doesn't exist.
+    // If you want to merge, you can pass { merge: true } as a third argument to setDoc,
+    // but for this use case, overwriting the entire scheduleData array is appropriate.
+    await setDoc(docRef, { scheduleData: schedule });
     console.log("Schedule saved to cloud successfully.");
   } catch (error) {
     console.error("Error saving schedule to cloud:", error);
@@ -143,24 +129,48 @@ export default function CormacsStarChartPage() {
     });
   };
 
-  // Load schedule from Cloud on initial mount
+  // Subscribe to real-time updates from Firestore
   useEffect(() => {
     setIsLoading(true);
-    fetchScheduleFromCloud()
-      .then(cloudSchedule => {
-        // Ensure cloudSchedule is an array and not empty, otherwise use initial
-        if (Array.isArray(cloudSchedule) && cloudSchedule.length > 0) {
-          setWeeklySchedule(cloudSchedule);
+    // Ensure db is imported from '@/lib/firebase'
+    const docRef = doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOCUMENT_ID);
+
+    const unsubscribe = onSnapshot(
+      docRef,
+      // Success callback for onSnapshot
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          // Make sure 'scheduleData' exists and is an array
+          const cloudSchedule = data.scheduleData as DaySchedule[] | undefined;
+          if (Array.isArray(cloudSchedule) && cloudSchedule.length > 0) {
+            setWeeklySchedule(cloudSchedule);
+          } else {
+            // Document exists but scheduleData is missing, empty, or not an array.
+            // save the initial schedule to establish a baseline.
+            setWeeklySchedule(initialWeeklySchedule);
+            saveScheduleToCloud(initialWeeklySchedule);
+          }
         } else {
-          // If Firestore is empty or returns an invalid format,
-          // save the initial schedule to establish a baseline.
+          // Document does not exist, save initial schedule to create it
+          console.log("No such document! Initializing with default schedule in Firestore.");
           setWeeklySchedule(initialWeeklySchedule);
           saveScheduleToCloud(initialWeeklySchedule);
         }
-      })
-      .catch(() => setWeeklySchedule(initialWeeklySchedule)) // Fallback on critical fetch error
-      .finally(() => setIsLoading(false));
-  }, []); // Empty dependency array means this effect runs only once on mount
+        setIsLoading(false); // This should be at the end of the success callback's logic
+      },
+      // Error callback for onSnapshot
+      (error) => {
+        console.error("Error subscribing to schedule updates:", error);
+        setWeeklySchedule(initialWeeklySchedule); // Fallback on error
+        setIsLoading(false); // Correctly placed inside the error callback
+      });
+
+    // Cleanup subscription on unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount
 
   const totalStars = React.useMemo(() => {
     return weeklySchedule.reduce((total, day) => {
