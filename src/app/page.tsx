@@ -17,8 +17,8 @@ interface Task {
   id: string;
   name: string;
   completed: boolean;
-  starColorClass?: string; // To store the randomized color class
-  starBounceSpeedClass?: string; // To store the randomized bounce speed
+  starColorClass?: string | null; // To store the randomized color class, allowing null
+  starBounceSpeedClass?: string | null; // To store the randomized bounce speed, allowing null
 }
 
 interface DaySchedule {
@@ -76,6 +76,21 @@ const initialWeeklySchedule: DaySchedule[] = daysOfWeek.map(day => ({
 const FIRESTORE_COLLECTION = 'starCharts'; // Must match your API route if you still use it for writes
 const FIRESTORE_DOCUMENT_ID = 'cormacWeeklySchedule'; // Must match your API route
 
+// Helper function to remove undefined properties recursively
+// Firestore doesn't support undefined values.
+function cleanScheduleForFirestore(schedule: DaySchedule[]): DaySchedule[] {
+  return JSON.parse(JSON.stringify(schedule), (key, value) => {
+    // If you want to explicitly store nulls for cleared optional fields:
+    // if (value === undefined && (key === 'starColorClass' || key === 'starBounceSpeedClass')) {
+    //   return null;
+    // }
+    // If you prefer to omit the fields entirely when undefined:
+    return value === undefined ? null : value; // Or simply: return value === undefined ? undefined : value; and let stringify remove them
+    // However, converting to null is safer if other parts of your app expect the keys.
+    // For this case, let's convert to null to be explicit.
+  });
+}
+
 async function saveScheduleToCloud(schedule: DaySchedule[]) {
   // This function now directly uses the client SDK for writes.
   // Your API POST route is still available if you prefer writes through the backend.
@@ -86,7 +101,8 @@ async function saveScheduleToCloud(schedule: DaySchedule[]) {
     // Using setDoc will overwrite the document or create it if it doesn't exist.
     // If you want to merge, you can pass { merge: true } as a third argument to setDoc,
     // but for this use case, overwriting the entire scheduleData array is appropriate.
-    await setDoc(docRef, { scheduleData: schedule });
+    const cleanedSchedule = cleanScheduleForFirestore(schedule);
+    await setDoc(docRef, { scheduleData: cleanedSchedule });
     console.log("Schedule saved to cloud successfully.");
   } catch (error) {
     console.error("Error saving schedule to cloud:", error);
@@ -115,10 +131,10 @@ export default function CormacsStarChartPage() {
             const isCompleting = !task.completed;
             const newColorClass = isCompleting
               ? starColorClasses[Math.floor(Math.random() * starColorClasses.length)]
-              : undefined; // Clear color if unchecking
+              : null; // Set to null instead of undefined
             const newBounceSpeedClass = isCompleting
               ? starBounceSpeedClasses[Math.floor(Math.random() * starBounceSpeedClasses.length)]
-              : undefined; // Clear bounce speed if unchecking
+              : null; // Set to null instead of undefined
 
             return { ...task, completed: isCompleting, starColorClass: newColorClass, starBounceSpeedClass: newBounceSpeedClass };
           }),
@@ -200,7 +216,7 @@ export default function CormacsStarChartPage() {
     const newInitialSchedule = JSON.parse(JSON.stringify(initialWeeklySchedule));
     const resetSchedule = newInitialSchedule.map((day: DaySchedule) => ({
       ...day, // Keep other day properties
-      tasks: day.tasks.map((task: Task) => ({ ...task, completed: false, starColorClass: undefined, starBounceSpeedClass: undefined })), // Reset all star-related properties
+      tasks: day.tasks.map((task: Task) => ({ ...task, completed: false, starColorClass: null, starBounceSpeedClass: null })), // Reset to null
     }));
     setWeeklySchedule(resetSchedule);
     saveScheduleToCloud(resetSchedule); // Save the reset schedule to cloud
@@ -287,8 +303,8 @@ export default function CormacsStarChartPage() {
                   </Label>
                   <StarIcon
                     isCompleted={task.completed}
-                    colorClass={task.starColorClass}
-                    bounceClass={task.starBounceSpeedClass}
+                    colorClass={task.starColorClass ?? undefined}
+                    bounceClass={task.starBounceSpeedClass ?? undefined}
                     baseClassName="h-6 w-6"
                   />
                 </div>
