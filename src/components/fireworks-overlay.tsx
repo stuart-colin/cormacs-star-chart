@@ -37,6 +37,8 @@ export function FireworksOverlay({ isVisible }: FireworksOverlayProps) {
       numberOfPieces={500} // Adjust number of pieces
       gravity={0.1} // Adjust gravity for slower/faster fall
       tweenDuration={5000} // Duration of the initial burst animation
+      // Ensure the confetti canvas is fixed to the viewport and has a high z-index
+      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 50 }}
     />
   );
 }

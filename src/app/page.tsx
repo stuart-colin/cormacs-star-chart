@@ -269,49 +269,60 @@ export default function CormacsStarChartPage() {
 
       {/* Use Flexbox to center the cards in the row, allowing them to wrap */}
       <div className="flex flex-wrap justify-center gap-6 pb-4">
-        {displayedSchedule.map(day => (
-          <Card
-            key={day.id}
-            // Give cards a consistent width. Adjust w-72 (18rem, 288px) as needed for your content.
-            className="flex flex-col bg-white shadow-lg rounded-xl border-2 border-sky-200 w-80" // Reverted to w-80 as per previous successful state
-          >
-            <CardHeader>
-              <CardTitle className="text-2xl text-center font-semibold bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-green-500 via-blue-500 to-purple-600 text-transparent bg-clip-text">
-                {day.dayName}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow space-y-3">
-              {day.tasks.map(task => (
-                <div key={task.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
-                  <Checkbox
-                    id={`${day.id}-${task.id}`}
-                    checked={task.completed}
-                    onCheckedChange={() => toggleTaskCompletion(day.id, task.id)}
-                    aria-label={`Mark ${task.name} as completed`}
-                  />
-                  <Label
-                    htmlFor={`${day.id}-${task.id}`}
-                    className={cn( // Use cn for conditional classes
-                      "flex-grow cursor-pointer text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis", // Added whitespace-nowrap, overflow-hidden, text-ellipsis
-                      task.completed && "line-through text-slate-400", // Changed single quotes to double quotes
-                      // Optional: Add a subtle color to the label based on completion
-                      // task.completed ? 'text-green-700' : 'text-gray-700'
-                      // Optional: Add a subtle color to the label based on completion
-                    )}
-                  >
-                    {task.name}
-                  </Label>
+        {displayedSchedule.map(day => {
+          const dailyStars = day.tasks.filter(task => task.completed).length;
+          return (
+            <Card
+              key={day.id}
+              // Add position: relative for absolute positioning of the star count
+              className="flex flex-col bg-white shadow-lg rounded-xl border-2 border-sky-200 w-80" // Removed 'relative' as it's no longer needed for this
+            >
+              {/* Removed the absolutely positioned daily star count div from here */}
+
+              <CardHeader className="flex justify-between items-center"> {/* Make CardHeader a flex container */}
+                <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-green-500 via-blue-500 to-purple-600 text-transparent bg-clip-text">
+                  {day.dayName}
+                </CardTitle>
+                {/* Daily Star Count Display - now inline with CardTitle */}
+                <div className="flex items-center">
+                  <span className="text-lg font-bold text-gray-700 mr-1">{dailyStars}</span>
                   <StarIcon
-                    isCompleted={task.completed}
-                    colorClass={task.starColorClass ?? undefined}
-                    bounceClass={task.starBounceSpeedClass ?? undefined}
-                    baseClassName="h-6 w-6"
+                    isCompleted={true} // Always show as "filled" for display purposes
+                    colorClass="animate-rainbow-fade" // Apply the new animation class
+                    baseClassName="h-5 w-5" // Ensure size is appropriate
                   />
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent className="flex-grow space-y-3">
+                {day.tasks.map(task => (
+                  <div key={task.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <Checkbox
+                      id={`${day.id}-${task.id}`}
+                      checked={task.completed}
+                      onCheckedChange={() => toggleTaskCompletion(day.id, task.id)}
+                      aria-label={`Mark ${task.name} as completed`}
+                    />
+                    <Label
+                      htmlFor={`${day.id}-${task.id}`}
+                      className={cn(
+                        "flex-grow cursor-pointer text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis",
+                        task.completed && "line-through text-slate-400",
+                      )}
+                    >
+                      {task.name}
+                    </Label>
+                    <StarIcon
+                      isCompleted={task.completed}
+                      colorClass={task.starColorClass ?? undefined}
+                      bounceClass={task.starBounceSpeedClass ?? undefined}
+                      baseClassName="h-5 w-5"
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </main>
   );

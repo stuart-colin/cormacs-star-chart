@@ -34,7 +34,13 @@ export function StarProgressBar({ currentStars, targetStars }: StarProgressBarPr
         />
       </ProgressPrimitive.Root>
       {currentStars >= targetStars && (
-        <p className="text-center text-2xl font-bold text-orange-500 animate-bounce pt-2">Prize Earned! 🥳🏆</p>
+        // Added flex, items-center, justify-center and increased px-6
+        <p className="fixed bottom-4 left-1/2 -translate-x-1/2 transform z-40
+                       flex items-center justify-center px-6 py-6 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600
+                       text-white text-2xl font-bold rounded-lg shadow-xl
+                       animate-bounce whitespace-nowrap"> {/* Added whitespace-nowrap and increased px to px-8 */}
+          🥳 Prize Earned! 🏆
+        </p>
       )}
     </div>
   )
