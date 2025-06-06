@@ -305,7 +305,7 @@ export default function CormacsStarChartPage() {
                     <Label
                       htmlFor={`${day.id}-${task.id}`}
                       className={cn(
-                        "flex-grow cursor-pointer text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis",
+                        "h-5 flex-grow cursor-pointer text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis text-base",
                         task.completed && "line-through text-slate-400",
                       )}
                     >
