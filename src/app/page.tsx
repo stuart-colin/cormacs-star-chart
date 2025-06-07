@@ -29,8 +29,8 @@ interface DaySchedule {
 
 const commonTasks: Omit<Task, 'id' | 'completed'>[] = [
   { name: 'Get Dressed Without Fuss' },
-  { name: 'Brush Teeth (Morning)' },
   { name: 'Eat Breakfast Nicely' },
+  { name: 'Brush Teeth (Morning)' },
   { name: 'Clean Up Toys' },
   { name: 'Eat Dinner Nicely' },
   { name: 'Brush Teeth (Evening)' },
@@ -248,16 +248,16 @@ export default function CormacsStarChartPage() {
         <div className="w-full max-w-3xl"> {/* Increased max-width for controls and progress bar */}
           {/* Row for Total Stars, Hide Weekends toggle, and Reset Week button */}
           <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-            <p className="text-2xl font-bold text-amber-500">Total Stars: {totalStars}</p>
-            <div className="flex items-center space-x-2">
+            <p className="text-2xl font-bold text-amber-500">Total Stars: {totalStars}</p> {/* Adjusted for consistency */}
+            <div className="flex items-center space-x-3"> {/* Increased space from space-x-2 to space-x-3 */}
               <Switch
                 id="show-weekends"
                 checked={hideWeekends} // Bind to hideWeekends state
-                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-pink-500 data-[state=checked]:via-purple-500 data-[state=checked]:to-blue-500" // Colorful gradient when checked
+                className="transform scale-110 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-pink-500 data-[state=checked]:via-purple-500 data-[state=checked]:to-blue-500" // Added transform scale-110
                 onCheckedChange={setHideWeekends} // Update hideWeekends state
                 aria-label="Toggle weekend visibility"
               />
-              <Label htmlFor="show-weekends" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="show-weekends" className="text-base font-medium text-gray-700"> {/* Changed text-sm to text-base */}
                 Hide Weekends
               </Label>
             </div>
@@ -268,7 +268,7 @@ export default function CormacsStarChartPage() {
       </div>
 
       {/* Use Flexbox to center the cards in the row, allowing them to wrap */}
-      <div className="flex flex-wrap justify-center gap-6 pb-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {displayedSchedule.map(day => {
           const dailyStars = day.tasks.filter(task => task.completed).length;
           return (

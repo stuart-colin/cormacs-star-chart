@@ -97,13 +97,22 @@ export const StarIcon: React.FC<StarIconProps> = ({
   }
 
   return (
-    <Star
+    <div
       className={cn(
-        baseClassName,
-        colorClass,
-        bounceClass,      // Continuous bounce if isCompleted
-        currentSpinClass  // Conditional spin, layered on top
+        baseClassName, // Applies size (e.g., h-5 w-5) to the wrapper
+        bounceClass,   // Bounce animation applied to the wrapper
+        // Ensures the div behaves like an icon and centers the star
+        'inline-flex items-center justify-center'
       )}
-    />
+    >
+      <Star
+        className={cn(
+          // Star should fill the wrapper
+          'h-full w-full',
+          colorClass,        // Color applied to the Star SVG
+          currentSpinClass   // Spin animation applied to the Star SVG
+        )}
+      />
+    </div>
   );
 };
