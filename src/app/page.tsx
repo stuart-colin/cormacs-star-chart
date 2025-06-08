@@ -241,9 +241,15 @@ export default function CormacsStarChartPage() {
       />
       {/* Sticky Header Section */}
       <div className="sticky top-0 z-10 flex flex-col items-center mb-8 gap-4 bg-white pb-4"> {/* Added sticky, top-0, z-10, bg-white, and pb-4 */}
-        {/* Main Header - Adjusted text size for responsiveness */}
-        <h1 className="text-4xl sm:text-5xl font-bold text-center text-blue-600 group whitespace-nowrap">
-          Cormac&apos;s Star Chart <span className="inline-block transform group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 ease-out">✨</span> {/* Applied font-chewy to the text part */}
+        {/* Main Header - Apply Chango font and adjust text size */}
+        <h1
+          // Adjusted font sizes: smaller base for mobile, then scaling up.
+          className="text-2xl sm:text-5xl md:text-6xl text-center text-blue-600 group whitespace-nowrap"
+          style={{
+            fontFamily: "var(--font-autour-one), sans-serif"
+          }}
+        >
+          Cormac&apos;s Star Chart <span className="inline-block transform group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 ease-out">✨</span>
         </h1>
         <div className="w-full max-w-3xl"> {/* Increased max-width for controls and progress bar */}
           {/* Row for Total Stars, Hide Weekends toggle, and Reset Week button */}
