@@ -28,14 +28,14 @@ interface DaySchedule {
 }
 
 const commonTasks: Omit<Task, 'id' | 'completed'>[] = [
-  { name: 'Get Dressed Without Fuss' },
   { name: 'Eat Breakfast Nicely' },
+  { name: 'Get Dressed Without Fuss' },
   { name: 'Brush Teeth (Morning)' },
   { name: 'Clean Up Toys' },
   { name: 'Eat Dinner Nicely' },
-  { name: 'Brush Teeth (Evening)' },
   { name: 'Bath Time Without Fuss' },
   { name: 'Get Ready for Bed Calmly' },
+  { name: 'Brush Teeth (Evening)' },
 ];
 
 // Define a list of fun star color classes
@@ -113,7 +113,7 @@ async function saveScheduleToCloud(schedule: DaySchedule[]) {
 export default function CormacsStarChartPage() {
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(initialWeeklySchedule);
   const [hideWeekends, setHideWeekends] = useState(true); // State to toggle weekend visibility, true by default to hide
-  const PRIZE_TARGET = 20; // Define the target number of stars for the prize
+  const PRIZE_TARGET = 25; // Define the target number of stars for the prize
   const [showCelebration, setShowCelebration] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // For loading state
 
