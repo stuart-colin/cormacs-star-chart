@@ -20,7 +20,7 @@
     "firebase-admin": "^13.4.0",
     "geist": "^1.4.2",
     "lucide-react": "^0.512.0",
-    "next": "15.3.3",
+    "next": "^16.2.1",
     "react": "^19.0.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.0.0",
